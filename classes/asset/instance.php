@@ -64,7 +64,7 @@ class Asset_Instance extends \Fuel\Core\Asset_Instance
 			//if ( ! is_file($compiled_css) or filemtime($source_less) > filemtime($compiled_css))
 			if ( ! is_file($compiled_css) or $this->shouldRecompile($compiled_css, \Config::get('asset.less_source_dir')))
 			{
-				require_once PKGPATH.'less'.DS.'vendor'.DS.'lessphp'.DS.'lessc.inc.php';
+				require_once PKGPATH.'fuel-less'.DS.'vendor'.DS.'lessphp'.DS.'lessc.inc.php';
 				
 				$handle = new \lessc($source_less);
 				$handle->indentChar = \Config::get('asset.indent_with');
