@@ -58,9 +58,11 @@ class Asset_Instance extends \Fuel\Core\Asset_Instance
 			
 			// Full path to css compiled file
 			$compiled_css = \Config::get('asset.less_output_dir').$lessfile;
-			
+
+
 			// Compile only if source is newer than compiled file
-			if ( ! is_file($compiled_css) or filemtime($source_less) > filemtime($compiled_css))
+			//if ( ! is_file($compiled_css) or filemtime($source_less) > filemtime($compiled_css))
+			if ( ! is_file($compiled_css) or $this->shouldRecompile($compiled_css, \Config::get('asset.less_source_dir')))
 			{
 				require_once PKGPATH.'less'.DS.'vendor'.DS.'lessphp'.DS.'lessc.inc.php';
 				
@@ -74,5 +76,39 @@ class Asset_Instance extends \Fuel\Core\Asset_Instance
 		}
 		
 		return static::css($stylesheets, $attr, $group, $raw);
+	}
+
+
+	/**
+	 * Checks if any file in the asset/less_source_dir is newer then the compiled file.
+	 *
+	 * I created this functions because I import files within my .less file. And then I
+	 * updated an imported .less file the main .less file won't be recompiled cuz this script
+	 * just chekcs the main .less files modification date.
+	 *
+	 * Note: This function works for my situation there I just use one .less file
+	 * that import others .less files. 
+	 *
+	 * If you use many .less files this file may recompile files that dosen't need too be recompiled.
+	 *
+	 * @author Sony?
+	 */
+	private function shouldRecompile($compiled_css, $dir)
+	{
+		foreach(glob($dir . '*') as $file)
+		{
+			if(is_dir($file)) {
+				if($this->shouldRecompile($compiled_css, $dir . $file . '/')) {
+					return true;
+				}
+			}
+			else {
+				if(filemtime($file) > filemtime($compiled_css)) {
+					return true;
+				}
+			}
+		}
+
+		return false;
 	}
 }
